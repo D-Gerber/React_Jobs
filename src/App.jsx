@@ -14,24 +14,66 @@ import JobPage, { jobLoader } from "./pages/JobPage";
   /* added { jobLoader } because we using params to fetch data from the API and not useEffect anymore */
 }
 import AddJobPage from "./pages/AddJobPage";
-
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={<MainLayout />}>
-      <Route index element={<HomePage />} />
-      <Route path="/jobs" element={<JobsPage />} />
-      <Route path="/add-job" element={<AddJobPage />} />
-      {/* <Route path="/jobs/:id" element={<JobPageFetchingDataUsingUseEffectExampleOnly />} /> */}
-      <Route path="/jobs/:id" element={<JobPage />} loader={jobLoader} />
-      {/* added loader={jobLoader} to this because we not using useEffect to fetch data we are using params */}
-      {/* the colon signifies that itt is dynamic  */}
-      <Route path="*" element={<NotFoundPage />} />
-      {/* using the asterisks is like a catch all meaning if there is any page not found in our website them the 404 will show */}
-    </Route>
-  )
-);
+import EditJobPage from "./pages/EditJobPage";
 
 const App = () => {
+  // Add new job
+  const addJob = async (newJob) => {
+    const res = await fetch("/api/jobs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newJob),
+    });
+    return;
+  };
+
+  // Delete Job
+  const deleteJob = async (id) => {
+    const res = await fetch(`/api/jobs/${id}`, {
+      method: "DELETE",
+    });
+    return;
+  };
+
+  // Update Job
+  const updateJob = async (job) => {
+    const res = await fetch(`/api/jobs/${job.id}`, {
+      method: "PUT",
+      headers: {
+        "COntent-Type": "application/json",
+      },
+      body: JSON.stringify(job),
+    });
+    return;
+  };
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/add-job" element={<AddJobPage addJobSubmit={addJob} />} />
+        {/* <Route path="/jobs/:id" element={<JobPageFetchingDataUsingUseEffectExampleOnly />} /> */}
+        <Route
+          path="/edit-job/:id"
+          element={<EditJobPage updateJobSubmit={updateJob} />}
+          loader={jobLoader}
+        />
+        <Route
+          path="/jobs/:id"
+          element={<JobPage deleteJob={deleteJob} />}
+          loader={jobLoader}
+        />
+        {/* added loader={jobLoader} to this because we not using useEffect to fetch data we are using params */}
+        {/* the colon signifies that itt is dynamic  */}
+        <Route path="*" element={<NotFoundPage />} />
+        {/* using the asterisks is like a catch all meaning if there is any page not found in our website them the 404 will show */}
+      </Route>
+    )
+  );
+
   return <RouterProvider router={router} />;
 };
 
